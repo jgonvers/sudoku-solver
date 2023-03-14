@@ -30,45 +30,50 @@ def sudoku_solve(board):
         if is_sol(board[i][j]):
             return(board[i][j])
         pos = set(list("123456789"))-(get_line(i,j)|get_column(i,j)|get_square(i,j))
-        if len(pos) == 1:
-            return pos.pop()
-        else:
-            return pos
+        return pos
     
     def get_first(board):
         for i in range(9):
             for j in range(9):
                 if type(board[i][j]) == set:
                     return(i, j, board[i][j])
-    
-    old_count = 0
-    while(True):
-        for i in range(9):
-            for j in range(9):
-                board[i][j] = possibility(i,j)
-        count = count_sol(board)
-        if old_count == count:
-            new_board = board
-            i,j,pos = get_first(new_board)
-            print_board(new_board)
-            for p in pos:
-                new_board[i][j] = p
-                sudoku_solve(new_board)
-                print(count_sol(new_board))
-                if count_sol(new_board) == 81:
-                    break
-            break
-        else:
+                
+    def fill_board(board):
+        old_count = 0
+        count = -1
+        while(count != old_count):
             old_count = count
+            for i in range(9):
+                for j in range(9):
+                    pos = possibility(i,j)
+                    if len(pos) == 0:
+                        board[i][j] = pos
+                        return(False)
+                    elif len(pos) == 1 and type(pos) != str:                        
+                        board[i][j] = pos.pop()
+                    else:
+                        board[i][j] = pos
+            count = count_sol(board)
+        return True
+            
+            
+    if fill_board(board):
+        if count_sol(board) == 81: return True
+        i,j,pos = get_first(board)
+        print(f"testing {i}, {j} with {pos}")
+        print_board(board)
+        for p in pos:
+            print(f"{i}, {j} testing {p}")
+            new_board = board
+            new_board[i][j] = p
+            if sudoku_solve(new_board):
+                board = new_board
+                return True
+        return False
+                
+    else:
+        return False
         
-        
-    
-        
-def print_board(board, show_pos=False):
-    for x in board:
-        print(x)
-
-
 board_easy = [list("....8.1.."),
               list(".43....76"),
               list("7.1..4..."),
@@ -79,16 +84,20 @@ board_easy = [list("....8.1.."),
               list("3851.24.7"),
               list("9.74.5682")]
 
-board = [["7","5","2",".","4",".",".","3","1"],
-         [".","8",".",".",".","1",".",".","."],
-         [".",".",".",".","2",".","5",".","9"],
-         [".",".","7",".",".",".",".",".","."],
-         ["2",".","8",".",".",".",".","5","."],
-         ["6","9","1","7","5",".",".",".","."],
-         [".",".",".","9",".",".",".",".","."],
-         ["9","2",".",".","8",".",".","6","3"],
-         [".","6","5",".",".","4",".","2","."]]
+board = [list(".268..3.."),
+         list(".5......6"),
+         list(".73.65.9."),
+         list("...74...8"),
+         list("7.4...1.2"),
+         list(".8...3.79"),
+         list("1.....2.4"),
+         list("..29....."),
+         list(".6.47....")]
 
-print_board(board_easy)
-sudoku_solve(board_easy)
-print_board(board_easy)
+def print_board(board):
+    for line in board:
+        print(line)
+
+print_board(board)
+sudoku_solve(board)
+print_board(board)
